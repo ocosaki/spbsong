@@ -432,6 +432,21 @@
     padding: 16px; display: flex; gap: 10px;
     border-top: 1px solid var(--forest-border); background: var(--forest-mid);
   }
+
+  .btn-reveal-top {
+    position: fixed;
+    top: 12px; right: 16px;
+    z-index: 20;
+    padding: 10px 16px;
+    background: var(--amber); border: none;
+    color: var(--forest); font-family: 'Playfair Display', serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    border-radius: 4px; cursor: pointer;
+    box-shadow: 0 3px 12px rgba(212,132,10,0.35);
+    display: none;
+  }
+  .btn-reveal-top.visible { display: block; }
+  .btn-reveal-top:active { transform: scale(0.97); }
   .btn-back-game {
     flex: 1; padding: 13px; background: transparent;
     border: 1px solid var(--forest-border); color: var(--text-dim);
@@ -632,6 +647,7 @@
 </div>
 
 <!-- SCORE -->
+<button class="btn-reveal-top" id="revealTopBtn" onclick="revealAll()">Reveal Answers ✦</button>
 <div id="score" class="screen">
   <div class="score-hero">
     <div class="score-eyebrow">Your Score</div>
@@ -856,6 +872,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
+  if (id !== 'score') document.getElementById('revealTopBtn').classList.remove('visible');
 }
 
 function buildNameTracker() {
@@ -1141,9 +1158,11 @@ function checkScore() {
     breakdown.appendChild(row);
   });
   showScreen('score');
+  document.getElementById('revealTopBtn').classList.add('visible');
 }
 
 function revealAll() {
+  document.getElementById('revealTopBtn').classList.remove('visible');
   const answered = userAnswers.filter(a => a && a !== '').length;
   track('reveal', answered);
   showScreen('results');
