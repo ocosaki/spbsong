@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Find the SPB Song</title>
+<meta property="og:title" content="Find the SPB Song 🎵">
+<meta property="og:description" content="18 songs. 18 Music Directors. One legendary voice hidden in the answers.">
+<meta property="og:image" content="https://raw.githubusercontent.com/ocosaki/spbsong/main/HBDSPB.png">
+<meta property="og:url" content="https://ocosaki.github.io/spbsong">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/ocosaki/spbsong/main/HBDSPB.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #0D1F0F;
+    --forest-mid: #152A17;
+    --forest-card: #1C3A1E;
+    --forest-border: #2D5230;
+    --amber: #D4840A;
+    --amber-light: #F0A830;
+    --amber-dim: #8B5A06;
+    --amber-glow: rgba(212,132,10,0.2);
+    --text: #F0EAD6;
+    --text-dim: #8FA882;
+    --tile-bg: #1A3019;
+    --tile-border: #3D6B40;
+    --tile-placed: #243D26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--forest);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── INTRO ── */
+  #intro {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 30%, #1E3D20 0%, var(--forest) 70%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #intro::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('https://raw.githubusercontent.com/ocosaki/spbsong/main/spb.jpeg');
+    background-size: cover;
+    background-position: center 20%;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #intro > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .intro-ornament { font-size: 48px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  .intro-eyebrow {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--amber-dim); margin-bottom: 12px;
+  }
+
+  .intro-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 900; line-height: 1.1;
+    color: var(--amber); margin-bottom: 8px;
+    text-shadow: 0 0 40px rgba(212,132,10,0.3);
+  }
+
+  .intro-sub {
+    font-size: 17px; font-style: italic; color: var(--text-dim);
+    margin-bottom: 8px; line-height: 1.5;
+  }
+
+  .intro-rule { width: 60px; height: 1px; background: var(--amber-dim); margin: 20px auto; }
+
+  .intro-desc {
+    font-size: 15px; color: var(--text-dim); line-height: 1.7;
+    max-width: 300px; margin: 0 auto 32px;
+  }
+
+  .intro-saki {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 32px;
+  }
+  .intro-saki span {
+    color: var(--amber); font-family: 'Playfair Display', serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 4px;
+  }
+
+  .btn-primary {
+    background: var(--amber); color: var(--forest);
+    border: none; padding: 16px 48px;
+    font-family: 'Playfair Display', serif; font-size: 16px;
+    font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; border-radius: 2px; transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(212,132,10,0.25);
+  }
+  .btn-primary:active { transform: scale(0.97); background: var(--amber-light); }
+
+  /* ── GAME HEADER ── */
+  .game-header {
+    background: var(--forest-mid);
+    border-bottom: 1px solid var(--forest-border);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+
+  .game-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px; color: var(--amber); letter-spacing: 2px;
+  }
+
+  .progress-pills { display: flex; gap: 3px; flex-wrap: wrap; max-width: 200px; }
+  .progress-pill {
+    width: 16px; height: 5px; border-radius: 3px;
+    background: var(--forest-border); transition: background 0.3s;
+  }
+  .progress-pill.answered { background: var(--amber); }
+  .progress-pill.skipped { background: var(--amber-dim); }
+  .progress-pill.current { background: var(--amber-light); }
+
+  /* ── GAME BODY ── */
+  .game-body { padding: 16px 16px 0; flex: 1; }
+
+  .song-counter {
+    font-family: 'Playfair Display', serif; font-size: 11px;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--amber-dim); margin-bottom: 6px;
+  }
+
+  /* Name tracker */
+  .name-tracker {
+    display: flex; gap: 2px; margin-bottom: 16px;
+    justify-content: center; flex-wrap: nowrap; overflow: hidden;
+  }
+  .name-letter {
+    width: calc((100vw - 56px) / 18); max-width: 30px; min-width: 18px;
+    height: 34px; border: 1px solid var(--forest-border); border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(10px, 3vw, 14px); font-weight: 700;
+    color: var(--forest-border); background: var(--forest-mid);
+    transition: all 0.4s;
+  }
+  .name-letter.revealed {
+    color: var(--amber); border-color: var(--amber-dim);
+    background: var(--tile-placed); box-shadow: 0 0 8px rgba(212,132,10,0.2);
+  }
+  .name-letter.current-letter {
+    border-color: var(--amber); color: var(--amber-light);
+    animation: pulse-letter 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-letter {
+    0%,100%{box-shadow:0 0 0 0 rgba(212,132,10,0.4)}
+    50%{box-shadow:0 0 0 4px rgba(212,132,10,0)}
+  }
+
+  /* MD Card */
+  .md-card {
+    background: var(--forest-card);
+    border: 1px solid var(--forest-border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    overflow: hidden;
+    min-height: 160px;
+  }
+
+  .md-card-content {
+    flex: 1;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .md-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; font-weight: 700; color: var(--amber);
+    line-height: 1.2;
+  }
+
+  .md-note {
+    font-size: 15px; line-height: 1.6; color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .md-image-wrap {
+    width: 28vw;
+    max-width: 130px;
+    min-width: 90px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .md-image-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 50%;
+    background: linear-gradient(to right, var(--forest-card), transparent);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .md-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+
+  .md-image-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; color: var(--amber-dim);
+    background: var(--forest-mid);
+  }
+
+  .md-info { display: none; }
+
+  /* Audio + Clue */
+  .audio-card {
+    background: var(--forest-card); border: 1px solid var(--forest-border);
+    border-radius: 8px; padding: 14px; margin-bottom: 14px;
+  }
+
+  .clue-line {
+    font-size: 17px; font-style: italic; color: var(--text);
+    margin-bottom: 12px; line-height: 1.5;
+    padding-left: 12px; border-left: 2px solid var(--amber-dim);
+  }
+  .clue-label {
+    font-style: normal; font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--amber);
+    display: block; margin-bottom: 4px;
+  }
+
+  .audio-controls { display: flex; align-items: center; gap: 12px; }
+
+  .play-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--amber); border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+    box-shadow: 0 2px 12px rgba(212,132,10,0.3);
+  }
+  .play-btn:active { transform: scale(0.93); }
+  .play-btn svg { fill: var(--forest); }
+
+  .audio-progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .audio-progress {
+    width: 100%; height: 3px; background: var(--forest-border);
+    border-radius: 2px; cursor: pointer; position: relative; overflow: hidden;
+  }
+  .audio-progress-fill {
+    height: 100%; background: var(--amber); border-radius: 2px;
+    transition: width 0.1s linear; width: 0%;
+  }
+  .audio-time { font-size: 11px; color: var(--text-dim); font-family: monospace; }
+
+  /* Answer */
+  .answer-label {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 8px;
+  }
+
+  .answer-slots {
+    display: flex; flex-direction: column; gap: 8px;
+    min-height: 52px; padding: 10px;
+    background: var(--forest-mid); border: 1px solid var(--forest-border);
+    border-radius: 6px; margin-bottom: 14px; align-items: flex-start;
+  }
+
+  .answer-word-group { display: flex; flex-direction: row; gap: 5px; flex-wrap: nowrap; flex-shrink: 0; }
+
+  .answer-slot {
+    width: clamp(26px, 7.5vw, 34px); height: clamp(32px, 8.5vw, 38px);
+    background: var(--tile-placed); border: 1px solid var(--tile-border);
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(13px, 3.8vw, 17px); font-weight: 700;
+    color: var(--amber-light); cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .answer-slot.empty {
+    background: transparent; border: 1px dashed var(--forest-border);
+    color: transparent; cursor: default;
+  }
+  .answer-slot:not(.empty):active { transform: scale(0.93); background: var(--tile-bg); }
+
+  /* Tiles */
+  .tiles-label {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 8px;
+  }
+  .tiles-pool {
+    display: flex; flex-wrap: wrap; gap: 6px; min-height: 52px; padding: 8px;
+    background: var(--forest-mid); border: 1px solid var(--forest-border);
+    border-radius: 6px; margin-bottom: 16px; align-items: center;
+  }
+  .tile {
+    width: clamp(30px, 9vw, 38px); height: clamp(36px, 10vw, 44px);
+    background: var(--tile-bg); border: 1px solid var(--tile-border);
+    border-bottom: 3px solid var(--amber-dim); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(15px, 4.5vw, 20px); font-weight: 700;
+    color: var(--amber-light); cursor: pointer; transition: all 0.12s;
+    user-select: none; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .tile:active { transform: scale(0.9) translateY(2px); border-bottom-width: 1px; box-shadow: none; }
+  .tile.used { opacity: 0; pointer-events: none; }
+
+  /* Actions */
+  .action-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .btn-skip {
+    flex: 1; padding: 13px; background: transparent;
+    border: 1px solid var(--forest-border); color: var(--text-dim);
+    font-family: 'Crimson Pro', serif; font-size: 15px;
+    border-radius: 4px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-skip:active { border-color: var(--amber-dim); color: var(--amber-dim); }
+  .btn-confirm {
+    flex: 2; padding: 13px; background: var(--amber); border: none;
+    color: var(--forest); font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 1px;
+    border-radius: 4px; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 3px 12px rgba(212,132,10,0.2);
+  }
+  .btn-confirm:disabled { background: var(--forest-border); color: var(--text-dim); box-shadow: none; cursor: default; }
+  .btn-confirm:not(:disabled):active { transform: scale(0.97); }
+
+  /* Song nav */
+  .song-nav {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+    padding: 12px 16px; border-top: 1px solid var(--forest-border);
+    background: var(--forest-mid);
+  }
+  .nav-dot {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid var(--forest-border); background: var(--tile-bg);
+    color: var(--text-dim); font-family: 'Playfair Display', serif;
+    font-size: 11px; font-weight: 700; display: flex;
+    align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .nav-dot.current { border-color: var(--amber); color: var(--amber); background: var(--tile-placed); }
+  .nav-dot.answered { border-color: var(--amber-dim); background: var(--amber-dim); color: var(--forest); }
+  .nav-dot.skipped { border-style: dashed; }
+
+  /* Submit */
+  .submit-row {
+    padding: 12px 16px; background: var(--forest-mid);
+    border-top: 1px solid var(--forest-border);
+  }
+  .btn-submit {
+    width: 100%; padding: 15px; background: transparent;
+    border: 1px solid var(--amber-dim); color: var(--amber);
+    font-family: 'Playfair Display', serif; font-size: 15px;
+    font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    border-radius: 4px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-submit.ready {
+    background: linear-gradient(135deg, #1A3019, #243D26);
+    border-color: var(--amber);
+    box-shadow: 0 0 20px rgba(212,132,10,0.15);
+  }
+  .btn-submit:active { transform: scale(0.98); }
+
+  /* ── SCORE SCREEN ── */
+  #score { background: var(--forest); align-items: stretch; }
+  .score-hero {
+    background: radial-gradient(ellipse at 50% 0%, #1E3D20 0%, var(--forest) 60%);
+    padding: 60px 24px 40px; text-align: center;
+    border-bottom: 1px solid var(--forest-border);
+  }
+  .score-eyebrow {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--amber-dim); margin-bottom: 20px;
+  }
+  .score-number {
+    font-family: 'Playfair Display', serif; font-size: 80px;
+    font-weight: 900; color: var(--amber); line-height: 1;
+    text-shadow: 0 0 40px rgba(212,132,10,0.4); margin-bottom: 8px;
+  }
+  .score-label { font-size: 16px; font-style: italic; color: var(--text-dim); }
+  .score-breakdown { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .score-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: var(--forest-card); border: 1px solid var(--forest-border); border-radius: 6px;
+  }
+  .score-row-num { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--text-dim); min-width: 20px; }
+  .score-row-title { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--text); flex: 1; }
+  .score-row-tick { font-size: 16px; }
+  .score-actions {
+    padding: 16px; display: flex; gap: 10px;
+    border-top: 1px solid var(--forest-border); background: var(--forest-mid);
+  }
+  .btn-back-game {
+    flex: 1; padding: 13px; background: transparent;
+    border: 1px solid var(--forest-border); color: var(--text-dim);
+    font-family: 'Crimson Pro', serif; font-size: 15px; border-radius: 4px; cursor: pointer;
+  }
+  .btn-reveal {
+    flex: 2; padding: 13px; background: var(--amber); border: none;
+    color: var(--forest); font-family: 'Playfair Display', serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 1px;
+    border-radius: 4px; cursor: pointer; box-shadow: 0 3px 12px rgba(212,132,10,0.25);
+  }
+  .btn-reveal:active { transform: scale(0.97); }
+  .btn-back-game:active { border-color: var(--amber-dim); color: var(--amber-dim); }
+
+  /* ── RESULTS ── */
+  #results { background: var(--forest); padding-bottom: 60px; }
+  .results-hero {
+    background: radial-gradient(ellipse at 50% 0%, #1E3D20 0%, var(--forest) 60%);
+    padding: 50px 24px 32px; text-align: center;
+    border-bottom: 1px solid var(--forest-border);
+  }
+  .results-eyebrow {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--amber-dim); margin-bottom: 16px;
+  }
+  .results-name {
+    display: flex; justify-content: center; gap: 2px;
+    flex-wrap: nowrap; margin-bottom: 16px; overflow: hidden;
+  }
+  .results-name-letter {
+    width: calc((100vw - 56px) / 18); max-width: 30px; min-width: 18px;
+    height: 38px; background: var(--forest-card);
+    border: 1px solid var(--amber-dim); border-bottom: 3px solid var(--amber);
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(12px, 3.5vw, 18px); font-weight: 900;
+    color: var(--amber); opacity: 0; transform: translateY(20px);
+    transition: all 0.5s; box-shadow: 0 0 12px rgba(212,132,10,0.15);
+  }
+  .results-name-letter.show { opacity: 1; transform: translateY(0); }
+
+  .results-tagline { font-size: 16px; font-style: italic; color: var(--text-dim); opacity: 0; transition: opacity 1s 0.5s; }
+  .results-tagline.show { opacity: 1; }
+
+  .results-saki {
+    margin-top: 10px;
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-dim); opacity: 0; transition: opacity 1s 1.5s;
+  }
+  .results-saki span {
+    color: var(--amber); font-family: 'Playfair Display', serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 4px;
+  }
+  .results-saki.show { opacity: 1; }
+
+  .results-list { padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .result-card {
+    background: var(--forest-card); border: 1px solid var(--forest-border);
+    border-radius: 8px; padding: 14px; opacity: 0; transform: translateX(-20px);
+    transition: all 0.5s; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .result-card.show { opacity: 1; transform: translateX(0); }
+
+  .result-number {
+    font-family: 'Playfair Display', serif; font-size: 20px;
+    font-weight: 900; color: var(--amber); line-height: 1; min-width: 24px;
+  }
+  .result-info { flex: 1; }
+  .result-song {
+    font-family: 'Playfair Display', serif; font-size: 16px;
+    font-weight: 700; color: var(--text); margin-bottom: 2px;
+    display: flex; align-items: baseline; gap: 1px;
+  }
+  .result-song .first-letter {
+    font-size: 30px; line-height: 1; color: var(--amber); font-weight: 900;
+  }
+  .result-md { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--amber-dim); margin-bottom: 3px; }
+  .result-clue { font-size: 13px; font-style: italic; color: var(--text-dim); line-height: 1.4; }
+  .result-status { font-size: 16px; line-height: 1; }
+
+  /* Birthday footer */
+  .birthday-footer {
+    text-align: center; padding: 32px 24px 16px;
+    opacity: 0; transition: opacity 1s;
+  }
+  .birthday-footer.show { opacity: 1; }
+  .birthday-text {
+    font-family: 'Playfair Display', serif; font-size: 22px;
+    font-weight: 700; color: var(--amber); line-height: 1.4; margin-bottom: 8px;
+  }
+  .birthday-sub { font-size: 14px; font-style: italic; color: var(--text-dim); margin-bottom: 20px; }
+  .created-by {
+    margin-top: 20px; font-size: 12px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text-dim);
+  }
+  .created-by span {
+    color: var(--amber); font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 4px;
+  }
+  .share-btn {
+    margin-top: 28px; display: inline-flex; align-items: center; gap: 10px;
+    background: #25D366; color: #fff; font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 1px;
+    padding: 14px 32px; border-radius: 4px; border: none; cursor: pointer;
+    text-decoration: none; box-shadow: 0 4px 16px rgba(37,211,102,0.3); transition: all 0.2s;
+  }
+  .share-btn:active { transform: scale(0.97); }
+
+  /* Correct flash */
+  @keyframes correct-flash {
+    0%{background:var(--tile-placed)} 50%{background:rgba(76,175,80,0.3);border-color:#4CAF50} 100%{background:var(--tile-placed)}
+  }
+  .answer-slot.correct-flash { animation: correct-flash 0.6s ease; }
+
+  .stars-burst {
+    position: fixed; top: 50%; left: 50%; pointer-events: none;
+    z-index: 999; font-size: 24px; animation: burst 0.8s ease-out forwards;
+  }
+  @keyframes burst {
+    0%{transform:translate(-50%,-50%) scale(0);opacity:1}
+    100%{transform:translate(-50%,-50%) scale(3);opacity:0}
+  }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="intro-ornament">🎙️</div>
+  <div class="intro-eyebrow">A Musical Tribute</div>
+  <div class="intro-headline">Find the<br>SPB Song</div>
+  <div class="intro-rule"></div>
+  <div class="intro-sub">Listen. Decode. Discover.</div>
+  <div class="intro-desc">
+    18 songs. 18 Music Directors.<br>
+    One voice that sang for all of them.<br>
+    Listen to the clip, read the clue,<br>
+    and arrange the tiles to name the song.
+  </div>
+  <div class="intro-saki">A tribute by <span>SaKi</span></div>
+  <button class="btn-primary" onclick="startGame()">Begin</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <div class="game-logo">SPB SONG</div>
+    <div class="progress-pills" id="progressPills"></div>
+  </div>
+  <div class="game-body">
+    <div class="song-counter" id="songCounter">SONG 1 OF 18</div>
+    <div class="name-tracker" id="nameTracker"></div>
+
+    <!-- MD Card -->
+    <div class="md-card" id="mdCard">
+      <div class="md-card-content">
+        <div class="md-name" id="mdName"></div>
+        <div class="md-note" id="mdNote"></div>
+      </div>
+      <div class="md-image-wrap">
+        <img id="mdImage" src="" alt="" onerror="this.style.display='none';document.getElementById('mdPlaceholder').style.display='flex'">
+        <div id="mdPlaceholder" class="md-image-placeholder" style="display:none">🎵</div>
+      </div>
+    </div>
+
+    <!-- Audio + Clue -->
+    <div class="audio-card">
+      <div class="clue-line"><span class="clue-label">Clue</span><span id="clueText"></span></div>
+      <div class="audio-controls">
+        <button class="play-btn" id="playBtn" onclick="togglePlay()">
+          <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="audio-progress-wrap">
+          <div class="audio-progress" id="audioProgressBar" onclick="seekAudio(event)">
+            <div class="audio-progress-fill" id="audioProgressFill"></div>
+          </div>
+          <div class="audio-time" id="audioTime">0:00 / 0:00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="answer-label">Your Answer</div>
+    <div class="answer-slots" id="answerSlots"></div>
+    <div class="tiles-label">Available Letters</div>
+    <div class="tiles-pool" id="tilesPool"></div>
+
+    <div class="action-row">
+      <button class="btn-skip" onclick="skipSong()">Park & Skip →</button>
+      <button class="btn-confirm" id="confirmBtn" onclick="confirmAnswer()" disabled>Confirm ✓</button>
+    </div>
+  </div>
+
+  <div class="song-nav" id="songNav"></div>
+  <div class="submit-row">
+    <button class="btn-submit" id="submitBtn" onclick="checkScore()">Check Score</button>
+  </div>
+</div>
+
+<!-- SCORE -->
+<div id="score" class="screen">
+  <div class="score-hero">
+    <div class="score-eyebrow">Your Score</div>
+    <div class="score-number" id="scoreNumber"></div>
+    <div class="score-label" id="scoreLabel"></div>
+  </div>
+  <div class="score-breakdown" id="scoreBreakdown"></div>
+  <div class="score-actions">
+    <button class="btn-back-game" onclick="showScreen('game')">← Back to Game</button>
+    <button class="btn-reveal" onclick="revealAll()">Reveal All Answers ✦</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="screen">
+  <div class="results-hero">
+    <div class="results-eyebrow">The Voice Was Always</div>
+    <div class="results-name" id="resultsName"></div>
+    <div class="results-tagline" id="resultsTagline">Happy Birthday, Balu Sir 🎙️</div>
+    <div class="results-saki" id="resultsSaki">A tribute by <span>SaKi</span></div>
+  </div>
+  <div class="results-list" id="resultsList"></div>
+  <div class="birthday-footer" id="birthdayFooter">
+    <div class="birthday-text">பாடல் என்றும் வாழும்</div>
+    <div class="birthday-sub">The song lives forever</div>
+    <a class="share-btn" id="shareBtn" href="#" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L.057 23.012a.75.75 0 00.931.931l5.153-1.475A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.523-5.184-1.433l-.371-.22-3.862 1.107 1.107-3.862-.22-.371A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      Share on WhatsApp
+    </a>
+  </div>
+</div>
+
+<audio id="audioEl"></audio>
+
+<script>
+const SUPABASE_URL = 'https://tgtwvtsrefbgomqyyvyo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRndHd2dHNyZWZiZ29tcXl5dnlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMjkyMjMsImV4cCI6MjA5NTYwNTIyM30.-IC9AAaKv2xX1E_R30lxqOo_7KsyvDxpgRPkHGXJuVM';
+const SESSION_ID = 'sess_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+async function track(event, songsAnswered = 0) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/spb_events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({ session_id: SESSION_ID, event, songs_answered: songsAnswered })
+    });
+  } catch(e) {}
+}
+
+const BASE = 'https://raw.githubusercontent.com/ocosaki/spbsong/main/';
+const SECRET_NAME = 'SPBALASUBRAHMANYAM';
+
+const SONGS = [
+  {
+    title: "SELAI KATTUM PENNUKKORU",
+    clue: "Smell of Love",
+    audio: BASE + "1.mp3",
+    md: "Hamsalekha",
+    mdImage: BASE + "hamsalekha.jpeg",
+    mdNote: "SPB and Hamsalekha created magic across the Kannada film industry in the 1980s and 90s. Their partnership produced some of the most celebrated chartbusters in Kannada cinema, with SPB's voice becoming the sonic signature of Hamsalekha's melodic imagination."
+  },
+  {
+    title: "PANI VIZHUM MALARVANAM",
+    clue: "Dewdrop Garden",
+    audio: BASE + "2.mp3",
+    md: "Ilaiyaraaja",
+    mdImage: BASE + "ilaiyaraaja.jpeg",
+    mdNote: "No partnership in Indian film music runs deeper. SPB sang over 3,000 songs for Ilaiyaraaja — a collaboration that defined an entire era of Tamil, Telugu and Kannada cinema. Raja composed, SPB breathed life into it. They were, simply, each other's best instrument."
+  },
+  {
+    title: "BARATHIKKU KANNAMMA",
+    clue: "The poet's muse",
+    audio: BASE + "3.mp3",
+    md: "Deva",
+    mdImage: BASE + "deva.jpeg",
+    mdNote: "When Deva took Tamil film music in a more mass, percussion-driven direction in the 1990s, SPB moved with him effortlessly. Their combination produced massive hits across commercial Tamil films, proving SPB's ability to adapt to any musical generation without losing his signature warmth."
+  },
+  {
+    title: "AIYAIYO NENJU",
+    clue: "A midnight craving",
+    audio: BASE + "4.mp3",
+    md: "G.V. Prakash Kumar",
+    mdImage: BASE + "gv.jpeg",
+    mdNote: "Across generations, SPB's voice found new meaning. GV Prakash, one of Tamil cinema's most prolific young composers, cherished the opportunity to work with the legend. SPB lent his voice with the same sincerity at 70 that he did at 25."
+  },
+  {
+    title: "LOOK LOVE ME DEAR",
+    clue: "English words with Tamil soul",
+    audio: BASE + "5.mp3",
+    md: "M.S. Viswanathan",
+    mdImage: BASE + "msv.jpeg",
+    mdNote: "MSV and SPB represent two golden eras meeting. MSV, who shaped Tamil film music from the 1950s, found in SPB a voice of extraordinary range and sensitivity. Their collaboration produced timeless melodies that still define what Tamil romantic music sounds like at its finest."
+  },
+  {
+    title: "AZHAGOORIL",
+    clue: "A song of cities",
+    audio: BASE + "6.mp3",
+    md: "Vidyasagar",
+    mdImage: BASE + "vidyasagar.jpeg",
+    mdNote: "Vidyasagar's compositions were known for their lush orchestration and emotional depth — and SPB was often his first call. Their association through the 1990s and 2000s produced some of the most beloved Tamil film songs, with SPB's voice carrying the full weight of Vidyasagar's melodic vision."
+  },
+  {
+    title: "SANGEETHA VAANIL",
+    clue: "Musical sky",
+    audio: BASE + "7.mp3",
+    md: "S.A. Rajkumar",
+    mdImage: BASE + "sar.jpeg",
+    mdNote: "SAR and SPB were one of Tamil cinema's most prolific partnerships. While SAR's canvas was wide, it was in melody that SPB truly shone — rendering some of the most tender and memorable songs of the era with a warmth that only his voice could carry."
+  },
+  {
+    title: "UNNAI PAARTHA PINBU NAAN",
+    clue: "Her one look changed him",
+    audio: BASE + "8.mp3",
+    md: "Bharadwaj",
+    mdImage: BASE + "baradwaj.jpeg",
+    mdNote: "Bharadwaj and SPB were a high-energy combination. Known for compositions that crackled with rhythm and vitality, Bharadwaj found in SPB a voice that could match his intensity note for note — bringing equal force to the fast-paced, exuberant songs that became their signature together."
+  },
+  {
+    title: "BALLEILAKKA",
+    clue: "Where are you going?",
+    audio: BASE + "9.mp3",
+    md: "A.R. Rahman",
+    mdImage: BASE + "arr.jpeg",
+    mdNote: "When Rahman arrived and reinvented Indian film music in 1992, he chose SPB for some of his most iconic early compositions. SPB's voice — already a legend — found new textures in Rahman's soundscapes, proving that true artistry has no expiry date."
+  },
+  {
+    title: "RAJA CHINNA ROJAVODU",
+    clue: "A story for kids and adults",
+    audio: BASE + "10.mp3",
+    md: "Chandrabose",
+    mdImage: BASE + "chandrabose.jpeg",
+    mdNote: "Chandrabose is a composer whose work carries deep emotional and cultural roots. SPB's ability to honour the full weight of a composition — musically and emotionally — made him the natural voice whenever the song demanded both power and sensitivity."
+  },
+  {
+    title: "AAYIRAM NILAVE VAA",
+    clue: "You are not one but a thousand",
+    audio: BASE + "11.mp3",
+    md: "K.V. Mahadevan",
+    mdImage: BASE + "kvm.jpeg",
+    mdNote: "KVM was one of the great composers of classical-rooted Tamil and Telugu film music. His 1980 masterpiece Sankarabharanam remains one of Indian cinema's most celebrated musical achievements — and SPB's voice was at the heart of it, singing with a devotion that matched the compositions' spiritual depth."
+  },
+  {
+    title: "HELLO HELLO HELLO",
+    clue: "Are you there?",
+    audio: BASE + "12.mp3",
+    md: "T. Rajendar",
+    mdImage: BASE + "tr.jpeg",
+    mdNote: "TR wrote, directed, composed and performed — and yet he always wanted SPB's voice on his films. SPB singing for TR represents one of Tamil cinema's most unlikely and endearing partnerships, the classicist lending his gift to the iconoclast."
+  },
+  {
+    title: "MAZHAIKKALA MEGAM",
+    clue: "Seasonal rains",
+    audio: BASE + "13.mp3",
+    md: "Gangai Amaran",
+    mdImage: BASE + "gangaiamaran.jpeg",
+    mdNote: "Gangai Amaran is a composer and lyricist of distinct identity and deep melodic sensibility. Beyond the music, he was one of SPB's closest and most cherished friends. That friendship lived inside the songs — you can hear it."
+  },
+  {
+    title: "AZHAGIYA VIZHIGALIL",
+    clue: "The artistic eye",
+    audio: BASE + "14.mp3",
+    md: "Shankar Ganesh",
+    mdImage: BASE + "shankarganesh.jpeg",
+    mdNote: "The duo of Shankar-Ganesh were pillars of Tamil and Telugu film music through the 1970s and 80s. SPB's voice was woven into their most celebrated compositions, and the association represents an era when melody, orchestration and voice were treated as a single unified art."
+  },
+  {
+    title: "NAAN POGIREN",
+    clue: "Pull me to earth please",
+    audio: BASE + "15.mp3",
+    md: "James Vasanthan",
+    mdImage: BASE + "jamesvasanthan.jpeg",
+    mdNote: "James Vasanthan brought a literary, alternative sensibility to Tamil film music in the 2000s. That he chose SPB for his compositions says everything about SPB's ability to transcend genre, generation and expectation."
+  },
+  {
+    title: "YAMMA YAMMA",
+    clue: "Pain of love",
+    audio: BASE + "16.mp3",
+    md: "Harris Jayaraj",
+    mdImage: BASE + "harris.jpeg",
+    mdNote: "Harris Jayaraj defined the sound of Tamil romantic cinema in the 2000s with his sweeping orchestration and emotional intensity. When SPB lent his voice to Harris's world, the result carried a depth and gravitas that only decades of mastery can bring."
+  },
+  {
+    title: "ANTHI NERA THENDRAL KAATRU",
+    clue: "Lullaby in motion",
+    audio: BASE + "17.mp3",
+    md: "Gyan Verma",
+    mdImage: BASE + "gyanverma.jpeg",
+    mdNote: "The composing duo of Manoj-Gyan brought fresh energy to Tamil film music, and SPB's presence on their work lent it immediate emotional credibility. A lesser-known but deeply felt chapter in SPB's story — the legend always showing up for the next generation."
+  },
+  {
+    title: "MUN PANIYAA",
+    clue: "A romantic confusion",
+    audio: BASE + "18.mp3",
+    md: "Yuvan Shankar Raja",
+    mdImage: BASE + "yuvan.jpeg",
+    mdNote: "Yuvan Shankar Raja carved a world entirely his own in Tamil film music — a sound unmistakably his, a generation unmistakably moved. SPB sang for him with the same wholeness he brought to every composer, every era. The voice belonged to all of music. It still does."
+  }
+];
+
+let currentSong = 0;
+let userAnswers = new Array(18).fill(null);
+let placedLetters = [];
+let tileUsed = [];
+let audioEl = document.getElementById('audioEl');
+let isPlaying = false;
+let currentShuffled = [];
+
+function startGame() {
+  track('begin');
+  showScreen('game');
+  buildNameTracker();
+  buildProgressPills();
+  buildSongNav();
+  loadSong(0);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function buildNameTracker() {
+  const tracker = document.getElementById('nameTracker');
+  tracker.innerHTML = '';
+  for (let i = 0; i < SECRET_NAME.length; i++) {
+    const el = document.createElement('div');
+    el.className = 'name-letter';
+    el.id = `nl-${i}`;
+    el.textContent = SECRET_NAME[i];
+    tracker.appendChild(el);
+  }
+  updateNameTracker();
+}
+
+function updateNameTracker() {
+  for (let i = 0; i < SONGS.length; i++) {
+    const el = document.getElementById(`nl-${i}`);
+    if (!el) continue;
+    el.classList.remove('revealed', 'current-letter');
+    if (userAnswers[i] && userAnswers[i] !== '') el.classList.add('revealed');
+    else if (i === currentSong) el.classList.add('current-letter');
+  }
+}
+
+function buildProgressPills() {
+  const pills = document.getElementById('progressPills');
+  pills.innerHTML = '';
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'progress-pill';
+    p.id = `pill-${i}`;
+    pills.appendChild(p);
+  }
+  updateProgressPills();
+}
+
+function updateProgressPills() {
+  for (let i = 0; i < 18; i++) {
+    const p = document.getElementById(`pill-${i}`);
+    if (!p) continue;
+    p.className = 'progress-pill';
+    if (i === currentSong) p.classList.add('current');
+    else if (userAnswers[i] && userAnswers[i] !== '') p.classList.add('answered');
+    else if (userAnswers[i] === '') p.classList.add('skipped');
+  }
+}
+
+function buildSongNav() {
+  const nav = document.getElementById('songNav');
+  nav.innerHTML = '';
+  for (let i = 0; i < 18; i++) {
+    const d = document.createElement('button');
+    d.className = 'nav-dot';
+    d.id = `navdot-${i}`;
+    d.textContent = i + 1;
+    d.onclick = () => goToSong(i);
+    nav.appendChild(d);
+  }
+  updateSongNav();
+}
+
+function updateSongNav() {
+  for (let i = 0; i < 18; i++) {
+    const d = document.getElementById(`navdot-${i}`);
+    if (!d) continue;
+    d.className = 'nav-dot';
+    if (i === currentSong) d.classList.add('current');
+    else if (userAnswers[i] && userAnswers[i] !== '') d.classList.add('answered');
+    else if (userAnswers[i] === '') d.classList.add('skipped');
+  }
+  updateSubmitBtn();
+}
+
+function updateSubmitBtn() {
+  const answered = userAnswers.filter(a => a && a !== '').length;
+  const btn = document.getElementById('submitBtn');
+  if (answered > 0) {
+    btn.classList.add('ready');
+    btn.textContent = `Check Score (${answered}/18)`;
+  }
+}
+
+function loadSong(index) {
+  stopAudio();
+  currentSong = index;
+  const song = SONGS[index];
+  document.getElementById('songCounter').textContent = `SONG ${index + 1} OF 18`;
+  document.getElementById('clueText').textContent = song.clue;
+  document.getElementById('mdName').textContent = song.md;
+  document.getElementById('mdNote').textContent = song.mdNote;
+
+  const img = document.getElementById('mdImage');
+  const placeholder = document.getElementById('mdPlaceholder');
+  img.style.display = 'block';
+  placeholder.style.display = 'none';
+  img.onerror = function() {
+    this.style.display = 'none';
+    placeholder.style.display = 'flex';
+  };
+  img.src = '';
+  img.src = song.mdImage;
+
+  const letters = song.title.replace(/\s/g, '').split('');
+  currentShuffled = [...letters].sort(() => Math.random() - 0.5);
+  tileUsed = new Array(currentShuffled.length).fill(false);
+
+  if (userAnswers[index] && userAnswers[index] !== '') {
+    const saved = userAnswers[index].replace(/\s/g, '').split('');
+    placedLetters = [];
+    const tempUsed = [...tileUsed];
+    saved.forEach(ch => {
+      const idx = currentShuffled.findIndex((t, i) => t === ch && !tempUsed[i]);
+      if (idx !== -1) { tempUsed[idx] = true; tileUsed[idx] = true; placedLetters.push({ char: ch, tileIndex: idx }); }
+    });
+  } else {
+    placedLetters = [];
+  }
+
+  renderAnswerSlots(song.title);
+  renderTilesPool(currentShuffled);
+  loadAudio(song.audio);
+  updateProgressPills();
+  updateSongNav();
+  updateNameTracker();
+  updateConfirmBtn();
+  window.scrollTo(0, 0);
+}
+
+function renderAnswerSlots(title) {
+  const container = document.getElementById('answerSlots');
+  container.innerHTML = '';
+  const words = title.split(' ');
+  let letterIdx = 0;
+  words.forEach((word) => {
+    const group = document.createElement('div');
+    group.className = 'answer-word-group';
+    word.split('').forEach(() => {
+      const slot = document.createElement('div');
+      const placed = placedLetters[letterIdx] || null;
+      slot.className = placed ? 'answer-slot' : 'answer-slot empty';
+      slot.textContent = placed ? placed.char : '';
+      if (placed) {
+        const tileIndex = placed.tileIndex;
+        slot.onclick = () => {
+          const idx = placedLetters.findIndex(p => p.tileIndex === tileIndex);
+          if (idx !== -1) returnTile(idx);
+        };
+      }
+      letterIdx++;
+      group.appendChild(slot);
+    });
+    container.appendChild(group);
+  });
+}
+
+function renderTilesPool(shuffled) {
+  const pool = document.getElementById('tilesPool');
+  pool.innerHTML = '';
+  shuffled.forEach((ch, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'tile' + (tileUsed[i] ? ' used' : '');
+    tile.textContent = ch;
+    tile.dataset.tileIdx = i;
+    tile.onclick = () => placeTile(i, ch);
+    pool.appendChild(tile);
+  });
+}
+
+function placeTile(tileIdx, ch) {
+  if (tileUsed[tileIdx]) return;
+  const song = SONGS[currentSong];
+  const totalLetters = song.title.replace(/\s/g, '').length;
+  if (placedLetters.length >= totalLetters) return;
+  tileUsed[tileIdx] = true;
+  placedLetters.push({ char: ch, tileIndex: tileIdx });
+  const tileEl = document.querySelector(`.tile[data-tile-idx="${tileIdx}"]`);
+  if (tileEl) tileEl.classList.add('used');
+  renderAnswerSlots(song.title);
+  updateConfirmBtn();
+}
+
+function returnTile(slotIdx) {
+  if (slotIdx >= placedLetters.length) return;
+  const removed = placedLetters.splice(slotIdx, 1)[0];
+  tileUsed[removed.tileIndex] = false;
+  const tileEl = document.querySelector(`.tile[data-tile-idx="${removed.tileIndex}"]`);
+  if (tileEl) tileEl.classList.remove('used');
+  renderAnswerSlots(SONGS[currentSong].title);
+  updateConfirmBtn();
+}
+
+function updateConfirmBtn() {
+  const song = SONGS[currentSong];
+  const total = song.title.replace(/\s/g, '').length;
+  document.getElementById('confirmBtn').disabled = placedLetters.length < total;
+}
+
+function confirmAnswer() {
+  const song = SONGS[currentSong];
+  const answer = placedLetters.map(p => p.char).join('');
+  const correct = song.title.replace(/\s/g, '');
+  if (answer === correct) {
+    userAnswers[currentSong] = song.title;
+    document.querySelectorAll('.answer-slot:not(.empty)').forEach(s => s.classList.add('correct-flash'));
+    const burst = document.createElement('div');
+    burst.className = 'stars-burst';
+    burst.textContent = '✦';
+    document.body.appendChild(burst);
+    setTimeout(() => burst.remove(), 900);
+    setTimeout(() => {
+      updateProgressPills(); updateSongNav(); updateNameTracker(); goToNextUnanswered();
+    }, 700);
+  }
+}
+
+function skipSong() {
+  if (userAnswers[currentSong] === null) userAnswers[currentSong] = '';
+  updateProgressPills(); updateSongNav(); goToNextUnanswered();
+}
+
+function goToNextUnanswered() {
+  for (let offset = 1; offset <= 18; offset++) {
+    const next = (currentSong + offset) % 18;
+    if (!userAnswers[next] || userAnswers[next] === '') { goToSong(next); return; }
+  }
+  updateSubmitBtn();
+}
+
+function goToSong(index) {
+  stopAudio(); loadSong(index);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Audio
+function loadAudio(src) {
+  audioEl.src = src; audioEl.load();
+  isPlaying = false; updatePlayIcon(false);
+  document.getElementById('audioProgressFill').style.width = '0%';
+  document.getElementById('audioTime').textContent = '0:00 / 0:00';
+}
+function togglePlay() {
+  if (isPlaying) { audioEl.pause(); isPlaying = false; }
+  else { audioEl.play().catch(()=>{}); isPlaying = true; }
+  updatePlayIcon(isPlaying);
+}
+function stopAudio() { audioEl.pause(); isPlaying = false; updatePlayIcon(false); }
+function updatePlayIcon(playing) {
+  document.getElementById('playIcon').innerHTML = playing
+    ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+    : '<path d="M8 5v14l11-7z"/>';
+}
+audioEl.addEventListener('timeupdate', () => {
+  if (!audioEl.duration) return;
+  const pct = (audioEl.currentTime / audioEl.duration) * 100;
+  document.getElementById('audioProgressFill').style.width = pct + '%';
+  document.getElementById('audioTime').textContent = `${fmt(audioEl.currentTime)} / ${fmt(audioEl.duration)}`;
+});
+audioEl.addEventListener('ended', () => { isPlaying = false; updatePlayIcon(false); });
+function seekAudio(e) {
+  if (!audioEl.duration) return;
+  const bar = document.getElementById('audioProgressBar');
+  const rect = bar.getBoundingClientRect();
+  audioEl.currentTime = ((e.clientX - rect.left) / rect.width) * audioEl.duration;
+}
+function fmt(s) { const m = Math.floor(s/60); return `${m}:${Math.floor(s%60).toString().padStart(2,'0')}`; }
+
+// Score
+function checkScore() {
+  stopAudio();
+  const answered = userAnswers.filter(a => a && a !== '').length;
+  track('check_score', answered);
+  const labels = ['Keep listening!','Good start!','Not bad!','Getting there!','Halfway there!','More than half!','Well done!','Impressive!','Almost there!','So close!','Great effort!','Wonderful!','Nearly there!','Brilliant!','Outstanding!','Incredible!','Almost perfect!','Perfect score!'];
+  document.getElementById('scoreNumber').textContent = `${answered}/18`;
+  document.getElementById('scoreLabel').textContent = labels[answered] || '';
+  const breakdown = document.getElementById('scoreBreakdown');
+  breakdown.innerHTML = '';
+  SONGS.forEach((song, i) => {
+    const got = userAnswers[i] && userAnswers[i] !== '';
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `<div class="score-row-num">${i+1}</div><div class="score-row-title">${got ? song.title : '—'}</div><div class="score-row-tick">${got ? '✦' : '○'}</div>`;
+    breakdown.appendChild(row);
+  });
+  showScreen('score');
+}
+
+function revealAll() {
+  const answered = userAnswers.filter(a => a && a !== '').length;
+  track('reveal', answered);
+  showScreen('results');
+  buildResultsName();
+  buildResultsList();
+  const msg = encodeURIComponent(`🎙️ I scored ${answered}/18 on the SPB Song quiz! 18 songs. 18 Music Directors. One legendary voice. Can you beat my score? Play here: https://ocosaki.github.io/spbsong`);
+  document.getElementById('shareBtn').href = `https://wa.me/?text=${msg}`;
+}
+
+function buildResultsName() {
+  const container = document.getElementById('resultsName');
+  container.innerHTML = '';
+  SECRET_NAME.split('').forEach((ch, i) => {
+    const el = document.createElement('div');
+    el.className = 'results-name-letter';
+    el.textContent = ch;
+    container.appendChild(el);
+    setTimeout(() => el.classList.add('show'), 200 + i * 100);
+  });
+  setTimeout(() => {
+    document.getElementById('resultsTagline').classList.add('show');
+    document.getElementById('resultsSaki').classList.add('show');
+  }, 200 + SECRET_NAME.length * 100 + 400);
+}
+
+function buildResultsList() {
+  const list = document.getElementById('resultsList');
+  list.innerHTML = '';
+  SONGS.forEach((song, i) => {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    const got = userAnswers[i] && userAnswers[i] !== '';
+    card.innerHTML = `
+      <div class="result-number">${i+1}</div>
+      <div class="result-info">
+        <div class="result-song"><span class="first-letter">${song.title[0]}</span>${song.title.slice(1)}</div>
+        <div class="result-md">${song.md}</div>
+        <div class="result-clue">${song.clue}</div>
+      </div>
+      <div class="result-status">${got ? '✦' : '○'}</div>`;
+    list.appendChild(card);
+    setTimeout(() => card.classList.add('show'), 300 + SECRET_NAME.length * 100 + i * 120);
+  });
+  setTimeout(() => {
+    document.getElementById('birthdayFooter').classList.add('show');
+  }, 300 + SECRET_NAME.length * 100 + SONGS.length * 120 + 400);
+}
+</script>
+</body>
+</html>
